@@ -1,0 +1,5 @@
+#Metadata for directory src\test\resources\FML\ManufacturingFederation.fml
+#Fri Apr 03 13:28:45 CEST 2026
+ManufacturingFederation.fml.requiredModelSlotList=org.openflexo.ta.csv.CSVModelSlot,org.openflexo.technologyadapter.owl.OWLModelSlot
+ManufacturingFederation.fml.uri=http\://fmlmcp.test/FML/ManufacturingFederation.fml
+ManufacturingFederation.fml.name=ManufacturingFederation

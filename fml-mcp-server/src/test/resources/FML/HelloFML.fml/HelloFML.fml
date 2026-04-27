@@ -1,0 +1,47 @@
+import ["http://fmlmcp.test/FML/Calculator.fml"];
+
+@URI("http://fmlmcp.test/FML/HelloFML.fml")
+public model HelloFML {
+
+	create() {
+		log "Hello FML Model created!";
+	}
+
+	public concept Greeter {
+
+		public String name;
+		public Calc calculator;
+
+		create(String aName, Double a, Double b) {
+			name = parameters.aName;
+			calculator = new Calc(parameters.a, parameters.b);
+		}
+
+		public String greet() {
+			return "Hello from FML, " + name + "!";
+		}
+
+		public String greetFormal(String title) {
+			return "Good day, " + parameters.title + " " + name + ".";
+		}
+	}
+
+	public concept Person {
+
+		public String firstName;
+		public String lastName;
+
+		create() {
+			firstName = "Mouad";
+			lastName = "Hayaoui";
+		}
+
+		delete() {}
+
+		public String fullName() {
+			log "Full name: " + firstName + " " + lastName;
+			return firstName + " " + lastName;
+		}
+	}
+
+}

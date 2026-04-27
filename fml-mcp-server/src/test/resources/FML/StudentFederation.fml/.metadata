@@ -1,0 +1,7 @@
+#Metadata for directory C:\Users\hayaoumo\another_dev\openflexo-fml-mcp-server\fml-mcp-server\src\test\resources\FML\StudentFederation.fml
+#Thu Apr 02 10:13:54 CEST 2026
+StudentFederation.fml.flexoConceptsList=Student
+StudentFederation.fml.name=StudentFederation
+StudentFederation.fml.requiredModelSlotList=org.openflexo.ta.csv.CSVModelSlot
+StudentFederation.fml.uri=http\://fmlmcp.test/FML/StudentFederation.fml
+StudentFederation.fml.version=1.0

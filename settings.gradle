@@ -1,0 +1,3 @@
+rootProject.name = 'openflexo-fml-mcp-server'
+
+include 'fml-mcp-server'

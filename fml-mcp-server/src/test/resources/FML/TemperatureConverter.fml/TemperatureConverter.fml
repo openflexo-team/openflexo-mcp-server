@@ -1,0 +1,28 @@
+@URI("http://fmlmcp.test/FML/TemperatureConverter.fml")
+public model TemperatureConverter {
+
+    create() {
+        log "TemperatureConverter model created!";
+    }
+
+    public concept Converter {
+
+        public String celsius;
+
+        create(String celsiusValue) {
+            celsius = parameters.celsiusValue;
+        }
+
+        public String toCelsius() {
+            return "Celsius: " + celsius;
+        }
+
+        public String toFahrenheit() {
+            return "Fahrenheit: " + celsius;
+        }
+
+        public String toKelvin() {
+            return "Kelvin: " + celsius;
+        }
+    }
+}

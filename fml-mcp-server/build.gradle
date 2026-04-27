@@ -1,0 +1,43 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'org.openflexo.fmlmcp.FMLMCPServerMain'
+
+ext {
+    openflexoVersion = '2.99'
+    gsonVersion      = '2.10.1'
+}
+
+dependencies {
+
+
+
+
+    implementation flexoFoundation()
+    implementation flexoOntology()
+    implementation("org.apache.commons:commons-csv:1.14.1")
+    //implementation("org.openflexo:mcp-ta:2.99-SNAPSHOT")
+    //implementation("org.openflexo:csv-ta:2.99-SNAPSHOT")
+
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.openflexo:flexo-foundation-rm:2.99'
+    //implementation("org.openflexo:owl-ta:2.99-SNAPSHOT")
+
+    implementation 'io.modelcontextprotocol.sdk:mcp:1.1.0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    runtimeOnly    'org.slf4j:slf4j-simple:1.7.36'
+
+
+    testImplementation testUtils()
+    testImplementation flexoFoundationTest()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

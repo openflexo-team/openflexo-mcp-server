@@ -1,0 +1,5 @@
+#Metadata for directory C:\Users\hayaoumo\another_dev\openflexo-fml-mcp-server\fml-mcp-server\src\test\resources\FML\MaintenanceFederation.fml
+#Fri Apr 03 12:40:13 CEST 2026
+MaintenanceFederation.fml.name=MaintenanceFederation
+MaintenanceFederation.fml.requiredModelSlotList=org.openflexo.ta.csv.CSVModelSlot
+MaintenanceFederation.fml.uri=http\://fmlmcp.test/FML/MaintenanceFederation.fml

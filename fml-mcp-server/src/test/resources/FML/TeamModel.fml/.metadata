@@ -1,0 +1,8 @@
+#Metadata for directory src\test\resources\FML\TeamModel.fml
+#Fri Apr 03 13:28:45 CEST 2026
+Team.fml.name=Team
+TeamModel.fml.flexoConceptsList=Member,Team
+Team.fml.uri=http\://fmlmcp.test/FML/Team.fml
+TeamModel.fml.uri=http\://fmlmcp.test/FML/TeamModel.fml
+Team.fml.flexoConceptsList=Member,Team
+TeamModel.fml.name=TeamModel

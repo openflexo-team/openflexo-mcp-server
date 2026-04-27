@@ -1,0 +1,83 @@
+use org.openflexo.ta.csv.CSVModelSlot as CSV;
+
+import org.openflexo.ta.csv.model.CSVDocument;
+import org.openflexo.ta.csv.model.CSVRow;
+import java.lang.String;
+import java.lang.Integer;
+import java.util.List;
+import java.util.ArrayList;
+
+@URI("http://fmlmcp.test/FML/CSVDemo.fml")
+@Version("0.1")
+public model CSVDemo {
+
+    // The CSV model slot — this is what bind_resource will connect to
+    public CSVDocument data with CSVModelSlot();
+
+    // Storage for loaded rows
+    public List<String> loadedNames = new ArrayList<>();
+    public Integer rowCount = 0;
+
+    // ── CreationScheme path A: bind via constructor ────────────────────
+    // This tests BehaviourArgumentMapper resource resolution.
+    // Call create_instance with arguments: {"resource": "<csv URI>"}
+    create(required Resource<CSVDocument> resource) {
+        connect data using parameters.resource;
+        log "CSVDemo created with resource binding.";
+    }
+
+    // ── CreationScheme path B: no-arg, bind later via bind_resource ───
+    create() {
+        log "CSVDemo created without resource — call bind_resource next.";
+    }
+
+    public void bind_resource(Resource<CSVDocument> resource) {
+        connect data using parameters.resource;
+        log "CSVDemo bound to resource.";
+    }
+    // ── Top-level behaviours (execute_workflow targets) ────────────────
+
+    /**
+     * Reads all rows from the CSV and logs them.
+     * Returns the number of rows found.
+     */
+    public Integer loadRows() {
+        Integer size = data.rows.size();
+        log "Loading " + size + " rows from CSV...";
+        rowCount = size;
+        loadedNames = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            CSVRow row = data.getRowAt(i);
+            String name = row.getCellAt(0).value;
+            String score = row.getCellAt(1).value;
+            loadedNames.add(name);
+            log "  Row " + i + ": name=" + name + ", score=" + score;
+        }
+        log "Done. Loaded " + rowCount + " rows.";
+        return rowCount;
+    }
+
+    /**
+     * Returns the name from the first row.
+     * Simple smoke test that the binding works.
+     */
+    public String headerRowName() {
+        if (data.rows.size() == 0) {
+            return "NO_DATA";
+        }
+        return data.getRowAt(0).getCellAt(0).value;
+    }
+
+    /**
+     * Returns total number of rows as a summary string.
+     */
+    public String summary() {
+        Integer size = data.rows.size();
+        return "CSVDemo has " + size + " rows loaded.";
+    }
+
+    delete() {}
+}
+
+
+

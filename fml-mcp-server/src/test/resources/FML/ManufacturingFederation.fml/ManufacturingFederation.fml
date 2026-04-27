@@ -1,0 +1,198 @@
+use org.openflexo.ta.csv.CSVModelSlot as CSV;
+use org.openflexo.technologyadapter.owl.OWLModelSlot as OWL;
+
+import org.openflexo.ta.csv.model.CSVDocument;
+import org.openflexo.ta.csv.model.CSVRow;
+import org.openflexo.technologyadapter.owl.model.OWLOntology;
+import org.openflexo.technologyadapter.owl.model.OWLIndividual;
+import org.openflexo.technologyadapter.owl.model.OWLClass;
+import java.lang.String;
+import java.lang.Integer;
+import java.lang.Double;
+import java.util.List;
+import java.util.ArrayList;
+
+@URI("http://fmlmcp.test/FML/ManufacturingFederation.fml")
+public model ManufacturingFederation {
+
+    public CSVDocument opsData with CSV::CSVModelSlot();
+    public OWLOntology ontology with OWLModelSlot();
+
+    // Single-resource create: bind CSV; OWL bound separately via connectOntology
+    create(required Resource<CSVDocument> csvResource) {
+        connect opsData using parameters.csvResource;
+        log "ManufacturingFederation: CSV connected, rows=" + opsData.rows.size();
+    }
+
+    create() {
+        log "ManufacturingFederation created (no-arg).";
+    }
+
+    // Call after creation to bind the OWL slot
+    public void connectOntology(Resource<OWLOntology> owlResource) {
+        connect ontology using parameters.owlResource;
+        List<OWLIndividual> all = select OWLIndividual from ontology;
+        log "OWL connected: " + all.size() + " individuals.";
+    }
+
+    // ── Helper: is localName an individual of OWL class className? ────────
+    boolean isKnownAs(String localName, String className) {
+        List<OWLIndividual> all = select OWLIndividual from ontology;
+        for (OWLIndividual ind : all) {
+            if (ind.name.equals(parameters.localName)) {
+                List<OWLClass> types = ind.types;
+                for (OWLClass t : types) {
+                    if (t.name.equals(parameters.className)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    // ── Helper: does OWL have any individual named localName? ─────────────
+    boolean ontologyHasIndividual(String localName) {
+        List<OWLIndividual> all = select OWLIndividual from ontology;
+        for (OWLIndividual ind : all) {
+            if (ind.name.equals(parameters.localName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ── unknownMaterials() ────────────────────────────────────────────────
+    public String unknownMaterials() {
+        String out = "";
+        Integer sz = opsData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = opsData.getRowAt(i);
+            String mat = row.getCellAt(2).value;
+            if (!isKnownAs(mat, "Material")) {
+                String token = mat + ";";
+                if (!out.contains(token)) {
+                    out = out + token;
+                }
+            }
+        }
+        if (out.length() == 0) {
+            out = "none";
+        }
+        log "unknownMaterials = " + out;
+        return out;
+    }
+
+    // ── orphanedMachines() ────────────────────────────────────────────────
+    public String orphanedMachines() {
+        String out = "";
+        Integer sz = opsData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = opsData.getRowAt(i);
+            String mach = row.getCellAt(3).value;
+            boolean found = isKnownAs(mach, "Machine") || isKnownAs(mach, "Robot") || isKnownAs(mach, "CNCMachine");
+            if (!found) {
+                String token = mach + ";";
+                if (!out.contains(token)) {
+                    out = out + token;
+                }
+            }
+        }
+        if (out.length() == 0) {
+            out = "none";
+        }
+        log "orphanedMachines = " + out;
+        return out;
+    }
+
+    // ── constraintViolations() ────────────────────────────────────────────
+    public String constraintViolations() {
+        String out = "";
+        Integer sz = opsData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = opsData.getRowAt(i);
+            String opId  = row.getCellAt(0).value;
+            String opTyp = row.getCellAt(1).value;
+            String mat   = row.getCellAt(2).value;
+            String stat  = row.getCellAt(5).value;
+            if (opTyp.equals("Welding")) {
+                if (mat.equals("Carbon_Fiber")) {
+                    out = out + opId + ":Welding+Carbon_Fiber(maxTemp=400_borderline_in_OWL) ";
+                }
+                if (stat.equals("FAIL")) {
+                    out = out + opId + ":Welding_FAIL(mandatory_review_per_ontology) ";
+                }
+                if (!ontologyHasIndividual(mat)) {
+                    out = out + opId + ":Welding_on_OWL_unknown_material(" + mat + ") ";
+                }
+            }
+            if (stat.equals("FAIL")) {
+                if (!opTyp.equals("Welding")) {
+                    out = out + opId + ":FAIL(" + opTyp + "+" + mat + ") ";
+                }
+            }
+        }
+        if (out.length() == 0) {
+            out = "none";
+        }
+        log "constraintViolations = " + out;
+        return out;
+    }
+
+    Integer countTotal(String opType) {
+        Integer c = 0;
+        Integer sz = opsData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = opsData.getRowAt(i);
+            if (row.getCellAt(1).value.equals(parameters.opType)) {
+                c = c + 1;
+            }
+        }
+        return c;
+    }
+
+    Integer countPass(String opType) {
+        Integer c = 0;
+        Integer sz = opsData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = opsData.getRowAt(i);
+            if (row.getCellAt(1).value.equals(parameters.opType)) {
+                if (row.getCellAt(5).value.equals("PASS")) {
+                    c = c + 1;
+                }
+            }
+        }
+        return c;
+    }
+
+    // ── coverageReport() — driven by OWL OperationType individuals ────────
+    public String coverageReport() {
+        String rpt = "";
+        List<OWLIndividual> all = select OWLIndividual from ontology;
+        for (OWLIndividual ind : all) {
+            List<OWLClass> types = ind.types;
+            for (OWLClass t : types) {
+                if (t.name.equals("OperationType")) {
+                    String opName = ind.name;
+                    Integer total  = countTotal(opName);
+                    Integer passed = countPass(opName);
+                    Double dtotal  = Double.valueOf(total.toString());
+                    Double dpassed = Double.valueOf(passed.toString());
+                    Double pct = 0.0;
+                    if (dtotal > 0.0) {
+                        pct = (dpassed / dtotal) * 100.0;
+                    }
+                    Integer ipct = pct.intValue();
+                    rpt = rpt + opName + "[total=" + total + " pass=" + passed + " pct=" + ipct + "%] ";
+                }
+            }
+        }
+        if (rpt.length() == 0) {
+            rpt = "no_op_types_in_ontology";
+        }
+        log "coverageReport = " + rpt;
+        return rpt;
+    }
+
+    delete() {}
+}

@@ -1,0 +1,185 @@
+use org.openflexo.ta.csv.CSVModelSlot as CSV;
+
+import org.openflexo.ta.csv.model.CSVDocument;
+import org.openflexo.ta.csv.model.CSVRow;
+import java.lang.String;
+import java.lang.Double;
+import java.lang.Integer;
+
+@URI("http://fmlmcp.test/FML/MaintenanceFederation.fml")
+public model MaintenanceFederation {
+
+    public CSVDocument logData with CSV::CSVModelSlot();
+
+    create(required Resource<CSVDocument> resource) {
+        connect logData using parameters.resource;
+        log "MaintenanceFederation created.";
+    }
+
+    create() {
+        log "MaintenanceFederation created (no-arg).";
+    }
+
+    // Total maintenance hours for a given machineId
+    public Double totalHours(String machineId) {
+        Double total = 0.0;
+        Integer sz = logData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = logData.getRowAt(i);
+            String mid = row.getCellAt(0).value;
+            if (mid.equals(parameters.machineId)) {
+                total = total + Double.valueOf(row.getCellAt(5).value);
+            }
+        }
+        log "totalHours(" + parameters.machineId + ") = " + total;
+        return total;
+    }
+
+    // Machine IDs that have at least one CRITICAL status entry
+    // Uses string accumulation + contains-check to deduplicate without a List
+    public String criticalMachines() {
+        String out = "";
+        Integer sz = logData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = logData.getRowAt(i);
+            String st = row.getCellAt(6).value;
+            if (st.equals("CRITICAL")) {
+                String mid = row.getCellAt(0).value;
+                String token = mid + " ";
+                if (!out.contains(token)) {
+                    out = out + token;
+                }
+            }
+        }
+        log "criticalMachines = " + out;
+        return out;
+    }
+
+    // Technician with the most interventions — single pass: track best via 3 known techs
+    // Full scan per candidate technician using nested loop
+    public String busiestTechnician() {
+        // Pass 1: collect unique non-empty technician names into a pipe-separated string
+        String techStr = "";
+        Integer sz = logData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = logData.getRowAt(i);
+            String tech = row.getCellAt(4).value;
+            if (tech.length() > 0) {
+                String token = "|" + tech + "|";
+                if (!techStr.contains(token)) {
+                    techStr = techStr + token;
+                }
+            }
+        }
+        log "unique techs string: " + techStr;
+        // Pass 2: for each row where technician is non-empty, count by scanning all rows
+        // Use nested loop: outer iterates unique techs by scanning col 4 again,
+        // inner counts matches — avoid helper calls entirely
+        String best = "";
+        Integer bestCount = 0;
+        for (int i = 0; i < sz; i++) {
+            CSVRow rowI = logData.getRowAt(i);
+            String cand = rowI.getCellAt(4).value;
+            if (cand.length() > 0) {
+                // Only count if this is the first occurrence of cand in our scan
+                // (avoid re-counting same technician multiple times as candidate)
+                String seen = "|" + cand + "|";
+                // Check if we already evaluated this candidate
+                // by checking if it appeared before index i
+                boolean alreadySeen = false;
+                for (int k = 0; k < i; k++) {
+                    CSVRow rowK = logData.getRowAt(k);
+                    if (rowK.getCellAt(4).value.equals(cand)) {
+                        alreadySeen = true;
+                    }
+                }
+                if (!alreadySeen) {
+                    // Count all rows for this candidate
+                    Integer c = 0;
+                    for (int j = 0; j < sz; j++) {
+                        CSVRow rowJ = logData.getRowAt(j);
+                        if (rowJ.getCellAt(4).value.equals(cand)) {
+                            c = c + 1;
+                        }
+                    }
+                    log "  " + cand + " -> " + c;
+                    if (c > bestCount) {
+                        bestCount = c;
+                        best = cand;
+                    }
+                }
+            }
+        }
+        log "busiestTechnician = " + best + " (" + bestCount + " interventions)";
+        return best;
+    }
+
+    // Number of rows with no technician assigned
+    public Integer missingTechnician() {
+        Integer missing = 0;
+        Integer sz = logData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = logData.getRowAt(i);
+            String tech = row.getCellAt(4).value;
+            if (tech.length() == 0) {
+                missing = missing + 1;
+            }
+        }
+        log "missingTechnician = " + missing;
+        return missing;
+    }
+
+    // Interventions per machine type at a given site
+    public String siteReport(String site) {
+        // Pass 1: collect unique machine types at this site into pipe-separated string
+        String typeStr = "";
+        Integer sz = logData.rows.size();
+        for (int i = 0; i < sz; i++) {
+            CSVRow row = logData.getRowAt(i);
+            String s = row.getCellAt(7).value;
+            if (s.equals(parameters.site)) {
+                String mtype = row.getCellAt(1).value;
+                String token = "|" + mtype + "|";
+                if (!typeStr.contains(token)) {
+                    typeStr = typeStr + token;
+                }
+            }
+        }
+        log "unique types at " + parameters.site + ": " + typeStr;
+        // Pass 2: for each unique type, count via nested scan
+        String rpt = "site=" + parameters.site + ":";
+        for (int i = 0; i < sz; i++) {
+            CSVRow rowI = logData.getRowAt(i);
+            String s = rowI.getCellAt(7).value;
+            if (s.equals(parameters.site)) {
+                String cand = rowI.getCellAt(1).value;
+                // Only process first occurrence of this type
+                boolean alreadySeen = false;
+                for (int k = 0; k < i; k++) {
+                    CSVRow rowK = logData.getRowAt(k);
+                    if (rowK.getCellAt(7).value.equals(parameters.site)) {
+                        if (rowK.getCellAt(1).value.equals(cand)) {
+                            alreadySeen = true;
+                        }
+                    }
+                }
+                if (!alreadySeen) {
+                    Integer c = 0;
+                    for (int j = 0; j < sz; j++) {
+                        CSVRow rowJ = logData.getRowAt(j);
+                        if (rowJ.getCellAt(7).value.equals(parameters.site)) {
+                            if (rowJ.getCellAt(1).value.equals(cand)) {
+                                c = c + 1;
+                            }
+                        }
+                    }
+                    rpt = rpt + " " + cand + "=" + c;
+                }
+            }
+        }
+        log "siteReport = " + rpt;
+        return rpt;
+    }
+
+    delete() {}
+}

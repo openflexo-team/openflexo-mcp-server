@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "fml-mcp-server": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "C:\\Users\\hayaoumo\\another_dev\\openflexo-fml-mcp-server\\fml-mcp-server\\build\\libs\\fml-mcp-server-2.99-SNAPSHOT.jar",
+        "--transport",
+        "stdio",
+        "--rc",
+        "C:\\Users\\hayaoumo\\another_dev\\openflexo-fml-mcp-server\\fml-mcp-server\\src\\test\\resources"
+      ],
+      "env": {}
+    }
+  },
+  "preferences": {
+    "coworkScheduledTasksEnabled": true,
+    "ccdScheduledTasksEnabled": true,
+    "sidebarMode": "chat",
+    "coworkWebSearchEnabled": true,
+    "floatingAtollActive": true
+  }
+}

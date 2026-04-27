@@ -1,0 +1,41 @@
+import java.lang.Double;
+
+@URI("http://fmlmcp.test/FML/Calculator.fml")
+@Version("1.0")
+public model Calculator {
+
+	public concept Calc {
+
+		public Double a;
+		public Double b;
+
+		create(Double a, Double b) {
+			this.a = parameters.a;
+			this.b = parameters.b;
+		}
+
+		delete() {}
+
+		public Double add() {
+			return this.a + this.b;
+		}
+
+		public Double subtract() {
+			return this.a - this.b;
+		}
+
+		public Double multiply() {
+			return this.a * this.b;
+		}
+
+		public Double divideBy() {
+			if (this.b == 0.0) {
+				log "Division by zero!";
+				return 0.0;
+			}
+			return this.a / this.b;
+		}
+
+	}
+
+}

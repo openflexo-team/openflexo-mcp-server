@@ -1,0 +1,6 @@
+#Metadata for directory C:\Users\hayaoumo\another_dev\openflexo-fml-mcp-server\fml-mcp-server\src\test\resources\FML\PersonModel.fml
+#Wed Apr 01 10:01:55 CEST 2026
+PersonModel.fml.flexoConceptsList=Animal,Person,Person\#SubHuman,Student
+PersonModel.fml.name=PersonModel
+PersonModel.fml.uri=http\://fmlmcp.test/FML/PersonModel.fml
+PersonModel.fml.version=1.0

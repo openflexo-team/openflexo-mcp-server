@@ -1,0 +1,6 @@
+#Metadata for directory src\test\resources\FML\PrinterFederation.fml
+#Fri Apr 03 13:28:45 CEST 2026
+PrinterFederation.fml.requiredModelSlotList=org.openflexo.ta.csv.CSVModelSlot
+PrinterFederation.fml.name=PrinterFederation
+PrinterFederation.fml.flexoConceptsList=PrintEvent
+PrinterFederation.fml.uri=http\://fmlmcp.test/FML/PrinterFederation.fml

@@ -1,0 +1,6 @@
+#Metadata for directory C:\Users\hayaoumo\another_dev\openflexo-fml-mcp-server\fml-mcp-server\src\test\resources\FML\CSVDemo.fml
+#Thu Apr 02 10:51:00 CEST 2026
+CSVDemo.fml.name=CSVDemo
+CSVDemo.fml.requiredModelSlotList=org.openflexo.ta.csv.CSVModelSlot
+CSVDemo.fml.uri=http\://fmlmcp.test/FML/CSVDemo.fml
+CSVDemo.fml.version=0.1

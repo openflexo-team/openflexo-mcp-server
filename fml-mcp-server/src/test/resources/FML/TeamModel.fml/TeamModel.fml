@@ -1,0 +1,36 @@
+@URI("http://fmlmcp.test/FML/TeamModel.fml")
+public model TeamModel {
+
+    public concept Member {
+
+        public String name;
+        public String role;
+
+        create(String memberName, String memberRole) {
+            name = parameters.memberName;
+            role = parameters.memberRole;
+        }
+
+        public String introduce() {
+            return name + " is our " + role;
+        }
+    }
+
+    public concept Team {
+
+        public String teamName;
+        public Member lead;
+
+        create(String aTeamName) {
+            teamName = parameters.aTeamName;
+        }
+
+        public void assignLead(Member aMember) {
+            lead = parameters.aMember;
+        }
+
+        public String describe() {
+            return "Team " + teamName + " is led by " + lead.name;
+        }
+    }
+}

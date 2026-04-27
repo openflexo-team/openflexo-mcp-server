@@ -1,0 +1,88 @@
+use org.openflexo.ta.csv.CSVModelSlot as CSV;
+
+import org.openflexo.ta.csv.model.CSVDocument;
+import org.openflexo.ta.csv.model.CSVRow;
+import org.openflexo.ta.csv.model.CSVCell;
+import java.lang.String;
+import java.lang.Double;
+import java.util.List;
+import java.util.ArrayList;
+
+@URI("http://fmlmcp.test/FML/StudentFederation.fml")
+public model StudentFederation {
+
+    public CSVDocument csv with CSV::CSVModelSlot();
+
+    create(required Resource<CSVDocument> resource) {
+        connect csv using parameters.resource;
+    }
+
+    public concept Student {
+        public String name;
+        public Double score;
+
+        create(String name, Double score) {
+            this.name = parameters.name;
+            this.score = parameters.score;
+        }
+    }
+
+    public void loadStudents() {
+        List<CSVRow> rows = CSV::SelectCSVRow(csvDocument=this.csv) from csv;
+        log "loadStudents: row count=" + rows.size();
+        for (CSVRow row : rows) {
+            if (row.rowIndex > 0) {
+                List<CSVCell> cells = row.cells;
+                if (cells.size() >= 2) {
+                    String nm = ((CSVCell)(cells.get(0))).value;
+                    Double sc = Double.valueOf(((CSVCell)(cells.get(1))).value);
+                    log "  row " + row.rowIndex + ": " + nm + " = " + sc;
+                }
+            }
+        }
+        log "loadStudents done";
+    }
+
+    public String topStudent() {
+        List<CSVRow> rows = CSV::SelectCSVRow(csvDocument=this.csv) from csv;
+        String best = "none";
+        Double bestScore = -1.0;
+        for (CSVRow row : rows) {
+            if (row.rowIndex > 0) {
+                List<CSVCell> cells = row.cells;
+                if (cells.size() >= 2) {
+                    String nm = ((CSVCell)(cells.get(0))).value;
+                    Double sc = Double.valueOf(((CSVCell)(cells.get(1))).value);
+                    if (sc > bestScore) {
+                        bestScore = sc;
+                        best = nm;
+                    }
+                }
+            }
+        }
+        log "Top student: " + best + " score=" + bestScore;
+        return best;
+    }
+
+    public Double average() {
+        List<CSVRow> rows = CSV::SelectCSVRow(csvDocument=this.csv) from csv;
+        Double total = 0.0;
+        int count = 0;
+        for (CSVRow row : rows) {
+            if (row.rowIndex > 0) {
+                List<CSVCell> cells = row.cells;
+                if (cells.size() >= 2) {
+                    Double sc = Double.valueOf(((CSVCell)(cells.get(1))).value);
+                    total = total + sc;
+                    count = count + 1;
+                }
+            }
+        }
+        if (count == 0) {
+            return 0.0;
+        }
+        Double avg = total / count;
+        log "Average: " + avg;
+        return avg;
+    }
+}

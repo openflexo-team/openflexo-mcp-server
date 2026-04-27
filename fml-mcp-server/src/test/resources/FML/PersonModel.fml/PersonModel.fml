@@ -1,0 +1,74 @@
+import java.lang.String;
+
+@URI("http://fmlmcp.test/FML/PersonModel.fml")
+@Version("1.0")
+public model PersonModel {
+
+	public concept Animal {
+
+		public String name;
+		public String species;
+
+		create(String aName, String aSpecies) {
+			name = parameters.aName;
+			species = parameters.aSpecies;
+		}
+
+		delete() {}
+
+		public String describe() {
+			log "Animal: " + name + " is a " + species;
+			return name + " is a " + species;
+		}
+	}
+
+	public concept Person {
+
+		public String firstName;
+		public String lastName;
+
+        public concept SubHuman{
+            public String subSpecies;
+
+            create(String aSubSpecies) {
+                subSpecies = parameters.aSubSpecies;
+            }
+
+            delete() {}
+
+            public String describeSubHuman() {
+                log "SubHuman: " + firstName + " " + lastName + " is a " + subSpecies;
+                return firstName + " " + lastName + " is a " + subSpecies;
+            }
+        }
+		create(String aFirstName, String aLastName) {
+			firstName = parameters.aFirstName;
+			lastName = parameters.aLastName;
+		}
+
+		delete() {}
+
+		public String fullName() {
+			log "Full name: " + firstName + " " + lastName;
+			return firstName + " " + lastName;
+		}
+	}
+	public concept Student extends Person {
+
+        public String studentID;
+
+        create(String aFirstName, String aLastName, String aStudentID) {
+            super(aFirstName, aLastName);
+            studentID = parameters.aStudentID;
+        }
+
+        delete() {}
+
+        public String studentInfo() {
+            log "Student: " + firstName + " " + lastName + ", ID: " + studentID;
+            return firstName + " " + lastName + ", ID: " + studentID;
+        }
+
+	}
+
+}

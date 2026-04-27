@@ -1,0 +1,114 @@
+use org.openflexo.ta.csv.CSVModelSlot as CSV;
+
+import org.openflexo.ta.csv.model.CSVDocument;
+import org.openflexo.ta.csv.model.CSVRow;
+import java.lang.String;
+import java.lang.Double;
+import java.lang.Integer;
+import java.lang.Boolean;
+import java.util.List;
+import java.util.ArrayList;
+
+@URI("http://fmlmcp.test/FML/PrinterFederation.fml")
+public model PrinterFederation {
+
+    public CSVDocument processData with CSV::CSVModelSlot();
+
+    // Parallel flat lists — one entry per CSV row
+    public List<String> col_traceId = new ArrayList<>();
+    public List<String> col_phase   = new ArrayList<>();
+    public List<String> col_evtype  = new ArrayList<>();
+    public List<String> col_temp    = new ArrayList<>();
+    public List<String> col_speed   = new ArrayList<>();
+    public List<String> col_amount  = new ArrayList<>();
+
+    create(required Resource<CSVDocument> resource) {
+        connect processData using parameters.resource;
+        log "PrinterFederation created.";
+    }
+
+    create() {
+        log "PrinterFederation created (no-arg).";
+    }
+
+    public void loadEvents() {
+        col_traceId = new ArrayList<>();
+        col_phase   = new ArrayList<>();
+        col_evtype  = new ArrayList<>();
+        col_temp    = new ArrayList<>();
+        col_speed   = new ArrayList<>();
+        col_amount  = new ArrayList<>();
+        Integer size = processData.rows.size();
+        log "loadEvents: " + size + " rows";
+        for (int i = 0; i < size; i++) {
+            CSVRow row = processData.getRowAt(i);
+            col_traceId.add(row.getCellAt(0).value);
+            col_phase.add(row.getCellAt(1).value);
+            col_evtype.add(row.getCellAt(2).value);
+            col_temp.add(row.getCellAt(3).value);
+            col_speed.add(row.getCellAt(4).value);
+            col_amount.add(row.getCellAt(5).value);
+        }
+        log "loadEvents done: " + col_traceId.size() + " events loaded.";
+    }
+
+    public Integer countTraces() {
+        List<String> seen = new ArrayList<>();
+        for (String tid : col_traceId) {
+            boolean found = false;
+            for (String s : seen) {
+                if (s.equals(tid)) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                seen.add(tid);
+            }
+        }
+        log "countTraces = " + seen.size();
+        return seen.size();
+    }
+
+    public String hottest() {
+        String hottestId = "";
+        Double maxTemp = -1.0;
+        Integer size = col_traceId.size();
+        for (int i = 0; i < size; i++) {
+            Double t = Double.valueOf(((String)(col_temp.get(i))));
+            if (t > maxTemp) {
+                maxTemp = t;
+                hottestId = (String)(col_traceId.get(i));
+            }
+        }
+        log "hottest = " + hottestId + " at " + maxTemp;
+        return hottestId;
+    }
+
+    public Boolean isComplete(String traceId) {
+        boolean hasPreheatStart = false;
+        boolean hasCoolEnd = false;
+        Integer size = col_traceId.size();
+        for (int i = 0; i < size; i++) {
+            String tid = (String)(col_traceId.get(i));
+            if (tid.equals(parameters.traceId)) {
+                String ph = (String)(col_phase.get(i));
+                String et = (String)(col_evtype.get(i));
+                if (ph.equals("Preheat")) {
+                    if (et.equals("START")) {
+                        hasPreheatStart = true;
+                    }
+                }
+                if (ph.equals("Cool")) {
+                    if (et.equals("END")) {
+                        hasCoolEnd = true;
+                    }
+                }
+            }
+        }
+        boolean result = hasPreheatStart && hasCoolEnd;
+        log "isComplete(" + parameters.traceId + ") = " + result;
+        return result;
+    }
+
+    delete() {}
+}

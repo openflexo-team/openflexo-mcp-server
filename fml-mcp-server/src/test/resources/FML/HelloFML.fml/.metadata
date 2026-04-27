@@ -1,0 +1,6 @@
+#Metadata for directory src\test\resources\FML\HelloFML.fml
+#Fri Apr 03 13:28:45 CEST 2026
+HelloFML.fml.flexoConceptsList=Greeter,Person
+HelloFML.fml.uri=http\://fmlmcp.test/FML/HelloFML.fml
+HelloFML.fml.dependenciesList=http\://fmlmcp.test/FML/Calculator.fml
+HelloFML.fml.name=HelloFML
