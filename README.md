@@ -42,21 +42,21 @@ Open your Claude Desktop config file (usually at `%APPDATA%\Claude\claude_deskto
 > Replace the path with wherever you cloned this repo.
 > you can find the config file by going to the settings in Claude Desktop and clicking "Open config file" at the bottom.
 
-![img.png](img.png)
+![img.png](./imgs/img.png)
 ---
 
 ## Step 3 — Start a conversation
 
 Once Claude Desktop picks up the server, you'll see it listed in the tools panel.
 
-![img_1.png](img_1.png)
+![img_1.png](./imgs/img_1.png)
 You can now talk to your FML models. For example:
 
 - *"Load the StudentFederation and show me the students"*
 - *"Run the Calculator with inputs X and Y"*
 - *"What does the MaintenanceFederation track?"*
 
-![img_2.png](img_2.png)
+![img_2.png](./imgs/img_2.png)
 ---
 
 ## Available example models
